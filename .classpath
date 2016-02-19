@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry excluding="src/" kind="src" path=""/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="lib" path="/Applications/data-integration/lib/kettle-core-5.4.0.1-130.jar"/>
+	<classpathentry kind="lib" path="/Applications/data-integration/lib/kettle-dbdialog-5.4.0.1-130.jar"/>
+	<classpathentry kind="lib" path="/Applications/data-integration/lib/kettle-engine-5.4.0.1-130.jar"/>
+	<classpathentry kind="lib" path="/Applications/data-integration/lib/kettle-ui-swt-5.4.0.1-130.jar"/>
+	<classpathentry kind="lib" path="/Applications/data-integration/lib/kettle5-log4j-plugin-5.4.0.1-130.jar"/>
+	<classpathentry kind="lib" path="/Applications/data-integration/lib/metastore-5.4.0.1-130.jar"/>
+	<classpathentry kind="lib" path="/Applications/data-integration/libswt/osx64/swt.jar"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>

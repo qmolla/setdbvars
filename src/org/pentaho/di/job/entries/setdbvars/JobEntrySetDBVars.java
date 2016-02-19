@@ -12,9 +12,11 @@ public class JobEntrySetDBVars extends JobEntryBase implements Cloneable, JobEnt
 	private static Class<?> PKG = JobEntrySetDBVars.class;
 	
 	private DatabaseMeta connection;
-	
+	private Boolean useVariableSubstitution = false;
+	private String sql;
 
 	
+
 	public JobEntrySetDBVars(String n)
 	{
 		super(n, "");
@@ -42,5 +44,20 @@ public class JobEntrySetDBVars extends JobEntryBase implements Cloneable, JobEnt
 		    return connection;
 	}
 	
+	public boolean getUseVariableSubstitution() {
+		    return useVariableSubstitution;
+	}
+
+	public void setUseVariableSubstitution( boolean subs ) {
+		    useVariableSubstitution = subs;
+	}
+	
+	public String getSql() {
+		return sql;
+	}
+
+	public void setSql(String sql) {
+		this.sql = sql;
+	}
 	
 }
