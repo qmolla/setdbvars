@@ -1,5 +1,6 @@
 package org.pentaho.di.job.entries.setdbvars;
 
+import java.sql.ResultSet;
 import java.util.List;
 
 import javax.tools.FileObject;
@@ -211,6 +212,8 @@ public class JobEntrySetDBVars extends JobEntryBase implements Cloneable, JobEnt
 	  public Result execute(Result previousResult, int arg1) throws KettleException {
 		Result result = previousResult;
 
+		ResultSet rs = null;
+		
 	    if ( connection != null ) {
 	        Database db = new Database( this, connection );
 	        FileObject SQLfile = null;
@@ -229,7 +232,9 @@ public class JobEntrySetDBVars extends JobEntryBase implements Cloneable, JobEnt
 	                }
 	           }
 	            
+	           rs = db.openQuery(mySQL);
 	            
+	           
 	            
 	        }catch ( KettleDatabaseException je ) {
 	            result.setNrErrors( 1 );
