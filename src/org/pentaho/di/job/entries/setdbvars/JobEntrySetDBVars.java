@@ -53,7 +53,6 @@ public class JobEntrySetDBVars extends JobEntryBase implements Cloneable, JobEnt
 	    variableScope = 0;
 
 	}
-
 	public JobEntrySetDBVars()
 	{
 		this("");
@@ -61,6 +60,7 @@ public class JobEntrySetDBVars extends JobEntryBase implements Cloneable, JobEnt
 	
 	 public Object clone() {
 		    JobEntrySetDBVars je = (JobEntrySetDBVars) super.clone();
+		    
 		    return je;
 	}
 
@@ -232,7 +232,7 @@ public class JobEntrySetDBVars extends JobEntryBase implements Cloneable, JobEnt
 	                }
 	           }
 	            
-	           rs = db.openQuery(mySQL);
+	           rs = db.openQuery(mySQL); 
 	            
 	           
 	            
