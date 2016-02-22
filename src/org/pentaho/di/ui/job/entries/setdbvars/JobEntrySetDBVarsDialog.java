@@ -2,8 +2,14 @@ package org.pentaho.di.ui.job.entries.setdbvars;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CCombo;
+import org.eclipse.swt.events.FocusAdapter;
+import org.eclipse.swt.events.FocusEvent;
+import org.eclipse.swt.events.KeyAdapter;
+import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
+import org.eclipse.swt.events.MouseAdapter;
+import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.ShellAdapter;
@@ -33,6 +39,7 @@ import org.pentaho.di.ui.core.widget.StyledTextComp;
 import org.pentaho.di.ui.job.dialog.JobDialog;
 import org.pentaho.di.ui.job.entry.JobEntryDialog;
 import org.pentaho.di.ui.trans.step.BaseStepDialog;
+import org.pentaho.di.ui.trans.steps.tableinput.SQLValuesHighlight;
 
 public class JobEntrySetDBVarsDialog extends JobEntryDialog implements JobEntryDialogInterface {
 
@@ -47,9 +54,9 @@ public class JobEntrySetDBVarsDialog extends JobEntryDialog implements JobEntryD
 	
 	private boolean changed;	
 	
-	private Label wlFileVariableType;
-	private CCombo wFileVariableType;
-	private FormData fdlFileVariableType, fdFileVariableType;
+	private Label wlVariableScope;
+	private CCombo wVariableScope;
+	private FormData fdlVariableScope, fdVariableScope;
 	
 	private Label wlUseSubs;
 	private Button wUseSubs;
@@ -69,11 +76,19 @@ public class JobEntrySetDBVarsDialog extends JobEntryDialog implements JobEntryD
 	private SelectionAdapter lsDef;
 
 	
-	public JobEntrySetDBVarsDialog(Shell parent, JobEntryInterface jobEntry, Repository rep, JobMeta jobMeta) {
-		super(parent, jobEntry, rep, jobMeta);
+	public JobEntrySetDBVarsDialog(Shell parent, JobEntryInterface jobEntryInt, Repository rep, JobMeta jobMeta) {
+
+	super(parent, jobEntryInt, rep, jobMeta);
 		jobEntry = (JobEntrySetDBVars) jobEntryInt;
-        if (this.jobEntry.getName() == null)
+		try {
+			if (this.jobEntry.getName() == null)
             this.jobEntry.setName(BaseMessages.getString(PKG, "SetDBVars.Name.Default"));
+		}
+		catch (Exception e){
+			System.out.println(e.getMessage());
+		}
+        
+        
 	}
 
 	
@@ -103,7 +118,14 @@ public class JobEntrySetDBVarsDialog extends JobEntryDialog implements JobEntryD
 	    formLayout.marginHeight = Const.FORM_MARGIN;
 		
 	    shell.setLayout( formLayout );
-	    shell.setText( BaseMessages.getString( PKG, "JobSQL.Title" ) );
+	    shell.setText( BaseMessages.getString( PKG, "SetDBVars.Title" ) );
+	    
+	    wOK = new Button( shell, SWT.PUSH );
+	    wOK.setText( BaseMessages.getString( PKG, "System.Button.OK" ) );
+	    wCancel = new Button( shell, SWT.PUSH );
+	    wCancel.setText( BaseMessages.getString( PKG, "System.Button.Cancel" ) );
+
+	    BaseStepDialog.positionBottomButtons( shell, new Button[] { wOK, wCancel }, margin, null );	
 	    
 	    
 	    // Name line
@@ -132,23 +154,23 @@ public class JobEntrySetDBVarsDialog extends JobEntryDialog implements JobEntryD
 	    wConnection.addModifyListener( lsMod );
 	    
 	    // file variable type line
-	    wlFileVariableType = new Label( shell, SWT.RIGHT );
-	    wlFileVariableType.setText( BaseMessages.getString( PKG, "JobEntrySetVariables.FileVariableType.Label" ) );
-	    props.setLook( wlFileVariableType );
-	    fdlFileVariableType = new FormData();
-	    fdlFileVariableType.left = new FormAttachment( 0, 0 );
-	    fdlFileVariableType.right = new FormAttachment( middle, -margin );
-	    fdlFileVariableType.top = new FormAttachment( wConnection, margin );
-	    wlFileVariableType.setLayoutData( fdlFileVariableType );
-	    wFileVariableType = new CCombo( shell, SWT.SINGLE | SWT.LEFT | SWT.BORDER | SWT.READ_ONLY );
-	    props.setLook( wFileVariableType );
-	    wFileVariableType.addModifyListener( lsMod );
-	    fdFileVariableType = new FormData();
-	    fdFileVariableType.left = new FormAttachment( middle, 0 );
-	    fdFileVariableType.top = new FormAttachment( wConnection, margin );
-	    fdFileVariableType.right = new FormAttachment( 100, 0 );
-	    wFileVariableType.setLayoutData( fdFileVariableType );
-	    wFileVariableType.setItems( jobEntry.getVariableTypeDescriptions() );
+	    wlVariableScope = new Label( shell, SWT.RIGHT );
+	    wlVariableScope.setText( BaseMessages.getString( PKG, "SetDBVars.VariableScope.Label" ) );
+	    props.setLook( wlVariableScope );
+	    fdlVariableScope = new FormData();
+	    fdlVariableScope.left = new FormAttachment( 0, 0 );
+	    fdlVariableScope.right = new FormAttachment( middle, -margin );
+	    fdlVariableScope.top = new FormAttachment( wConnection, margin );
+	    wlVariableScope.setLayoutData( fdlVariableScope );
+	    wVariableScope = new CCombo( shell, SWT.SINGLE | SWT.LEFT | SWT.BORDER | SWT.READ_ONLY );
+	    props.setLook( wVariableScope );
+	    wVariableScope.addModifyListener( lsMod );
+	    fdVariableScope = new FormData();
+	    fdVariableScope.left = new FormAttachment( middle, 0 );
+	    fdVariableScope.top = new FormAttachment( wConnection, margin );
+	    fdVariableScope.right = new FormAttachment( 100, 0 );
+	    wVariableScope.setLayoutData( fdVariableScope );
+	    wVariableScope.setItems( jobEntry.getVariableTypeDescriptions() );
 	    
 	    // Use variable substitution?
 	    wlUseSubs = new Label( shell, SWT.RIGHT );
@@ -156,7 +178,7 @@ public class JobEntrySetDBVarsDialog extends JobEntryDialog implements JobEntryD
 	    props.setLook( wlUseSubs );
 	    fdlUseSubs = new FormData();
 	    fdlUseSubs.left = new FormAttachment( 0, 0 );
-	    fdlUseSubs.top = new FormAttachment( wConnection, 2 * margin );
+	    fdlUseSubs.top = new FormAttachment( wVariableScope,  margin );
 	    fdlUseSubs.right = new FormAttachment( middle, -margin );
 	    wlUseSubs.setLayoutData( fdlUseSubs );
 	    wUseSubs = new Button( shell, SWT.CHECK );
@@ -164,7 +186,7 @@ public class JobEntrySetDBVarsDialog extends JobEntryDialog implements JobEntryD
 	    wUseSubs.setToolTipText( BaseMessages.getString( PKG, "SetDBVars.UseVariableSubst.Tooltip" ) );
 	    fdUseSubs = new FormData();
 	    fdUseSubs.left = new FormAttachment( middle, 0 );
-	    fdUseSubs.top = new FormAttachment(  wConnection, 2 * margin );
+	    fdUseSubs.top = new FormAttachment(  wVariableScope,  margin );
 	    fdUseSubs.right = new FormAttachment( 100, 0 );
 	    wUseSubs.setLayoutData( fdUseSubs );
 	    wUseSubs.addSelectionListener( new SelectionAdapter() {
@@ -203,13 +225,7 @@ public class JobEntrySetDBVarsDialog extends JobEntryDialog implements JobEntryD
 	    fdSQL.bottom = new FormAttachment( wlPosition, -margin );
 	    wSQL.setLayoutData( fdSQL );
 	    
-	    
-	    wOK = new Button( shell, SWT.PUSH );
-	    wOK.setText( BaseMessages.getString( PKG, "System.Button.OK" ) );
-	    wCancel = new Button( shell, SWT.PUSH );
-	    wCancel.setText( BaseMessages.getString( PKG, "System.Button.Cancel" ) );
-
-	    BaseStepDialog.positionBottomButtons( shell, new Button[] { wOK, wCancel }, margin, null );
+	   
 	    
 	    // Add listeners
 	    lsCancel = new Listener() {
@@ -228,7 +244,7 @@ public class JobEntrySetDBVarsDialog extends JobEntryDialog implements JobEntryD
 
 	    lsDef = new SelectionAdapter() {
 	      public void widgetDefaultSelected( SelectionEvent e ) {
-	        ok();
+	        ok();   
 	      }
 	    };
 
@@ -241,6 +257,50 @@ public class JobEntrySetDBVarsDialog extends JobEntryDialog implements JobEntryD
 	        cancel();
 	      }
 	    } );
+
+	    wSQL.addModifyListener( new ModifyListener() {
+	        public void modifyText( ModifyEvent arg0 ) {
+	          setPosition();
+	        }
+
+	    } );
+
+	    wSQL.addKeyListener( new KeyAdapter() {
+	        public void keyPressed( KeyEvent e ) {
+	          setPosition();
+	        }
+
+	        public void keyReleased( KeyEvent e ) {
+	          setPosition();
+	        }
+	    } );
+	    wSQL.addFocusListener( new FocusAdapter() {
+	        public void focusGained( FocusEvent e ) {
+	          setPosition();
+	        }
+
+	        public void focusLost( FocusEvent e ) {
+	          setPosition();
+	        }
+	    } );
+	    wSQL.addMouseListener( new MouseAdapter() {
+	        public void mouseDoubleClick( MouseEvent e ) {
+	          setPosition();
+	        }
+
+	        public void mouseDown( MouseEvent e ) {
+	          setPosition();
+	        }
+
+	        public void mouseUp( MouseEvent e ) {
+	          setPosition();
+	        }
+	    } );
+	    wSQL.addModifyListener( lsMod );
+
+	      // Text Higlighting
+	    wSQL.addLineStyleListener( new SQLValuesHighlight() );
+	    
 
 	    getData();
 
@@ -273,7 +333,7 @@ public class JobEntrySetDBVarsDialog extends JobEntryDialog implements JobEntryD
 
 	    wUseSubs.setSelection( jobEntry.getUseVariableSubstitution() );
 
-	    wFileVariableType.setText( jobEntry.getVariableTypeDescription( jobEntry.getFileVariableType() ) );
+	    wVariableScope.setText( jobEntry.getVariableTypeDescription( jobEntry.getVariableScope() ) );
 
 	    wName.selectAll();
 	    wName.setFocus();
@@ -305,9 +365,28 @@ public class JobEntrySetDBVarsDialog extends JobEntryDialog implements JobEntryD
 	   jobEntry.setName( wName.getText() );
 	   jobEntry.setSql(wSQL.getText() );
 	   jobEntry.setUseVariableSubstitution( wUseSubs.getSelection() );
-	   jobEntry.setFileVariableType( jobEntry.getVariableType( wFileVariableType.getText() ) );
+	   jobEntry.setVariableScope( jobEntry.getVariableType( wVariableScope.getText() ) );
 	   jobEntry.setDatabase( jobMeta.findDatabase( wConnection.getText() ) );
 	   dispose();
 	} 
 	 
+	
+	  public void setPosition() {
+
+	    String scr = wSQL.getText();
+	    int linenr = wSQL.getLineAtOffset( wSQL.getCaretOffset() ) + 1;
+	    int posnr = wSQL.getCaretOffset();
+
+	    // Go back from position to last CR: how many positions?
+	    int colnr = 0;
+	    while ( posnr > 0 && scr.charAt( posnr - 1 ) != '\n' && scr.charAt( posnr - 1 ) != '\r' ) {
+	      posnr--;
+	      colnr++;
+	    }
+	    wlPosition.setText( BaseMessages.getString( PKG, "SetDBVars.Position.Label", "" + linenr, "" + colnr ) );
+
+	}
+	
+	
+	
 }
