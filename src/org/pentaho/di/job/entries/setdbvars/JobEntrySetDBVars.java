@@ -1,9 +1,8 @@
 package org.pentaho.di.job.entries.setdbvars;
 
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.List;
-
-import javax.tools.FileObject;
 
 import org.pentaho.di.cluster.SlaveServer;
 import org.pentaho.di.core.Const;
@@ -12,13 +11,19 @@ import org.pentaho.di.core.database.Database;
 import org.pentaho.di.core.database.DatabaseMeta;
 import org.pentaho.di.core.exception.KettleDatabaseException;
 import org.pentaho.di.core.exception.KettleException;
+import org.pentaho.di.core.exception.KettleJobException;
 import org.pentaho.di.core.exception.KettleXMLException;
 import org.pentaho.di.core.xml.XMLHandler;
 import org.pentaho.di.i18n.BaseMessages;
+import org.pentaho.di.job.Job;
+import org.pentaho.di.job.JobMeta;
 import org.pentaho.di.job.entry.JobEntryBase;
 import org.pentaho.di.job.entry.JobEntryInterface;
 import org.pentaho.di.repository.ObjectId;
 import org.pentaho.di.repository.Repository;
+import org.pentaho.di.resource.ResourceEntry;
+import org.pentaho.di.resource.ResourceEntry.ResourceType;
+import org.pentaho.di.resource.ResourceReference;
 import org.pentaho.metastore.api.IMetaStore;
 import org.w3c.dom.Node;
 
@@ -30,6 +35,9 @@ public class JobEntrySetDBVars extends JobEntryBase implements Cloneable, JobEnt
 	private String sql;
 	private Boolean useVariableSubstitution = false;
 	public int variableScope;
+	private String varNameField;
+	private String valueNameField;
+	private String isEncryptedField;
 
 	public static final int VARIABLE_TYPE_JVM = 0;
 	public static final int VARIABLE_TYPE_CURRENT_JOB = 1;
@@ -80,6 +88,10 @@ public class JobEntrySetDBVars extends JobEntryBase implements Cloneable, JobEnt
 	    retval.append( "      " ).append(
 	    	      XMLHandler.addTagValue( "variableScope", getVariableTypeCode( variableScope ) ) );
 	    
+	    retval.append( "      " ).append( XMLHandler.addTagValue( "variableNameField", varNameField ) );
+	    retval.append( "      " ).append( XMLHandler.addTagValue( "valueNameField", valueNameField ) );
+	    retval.append( "      " ).append( XMLHandler.addTagValue( "isEncryptedField", isEncryptedField ) );
+	    
 	    return retval.toString();
 	}
 	 
@@ -92,7 +104,10 @@ public class JobEntrySetDBVars extends JobEntryBase implements Cloneable, JobEnt
 	      variableScope = getVariableType( XMLHandler.getTagValue( entrynode, "variableScope" ) );
 	      String dbname = XMLHandler.getTagValue( entrynode, "connection" );
 	      String sSubs = XMLHandler.getTagValue( entrynode, "useVariableSubstitution" );
-
+	      varNameField = XMLHandler.getTagValue( entrynode, "variableNameField" );
+	      valueNameField = XMLHandler.getTagValue( entrynode, "valueNameField" );
+	      isEncryptedField = XMLHandler.getTagValue( entrynode, "isEncryptedField" );
+	      
 	      if ( sSubs != null && sSubs.equalsIgnoreCase( "T" ) ) {
 	        useVariableSubstitution = true;
 	      }
@@ -107,6 +122,9 @@ public class JobEntrySetDBVars extends JobEntryBase implements Cloneable, JobEnt
 	    List<SlaveServer> slaveServers ) throws KettleException {
 	    try {
 	      sql = rep.getJobEntryAttributeString( id_jobentry, "sql" );
+	      varNameField = rep.getJobEntryAttributeString( id_jobentry, "variableNameField" );
+	      valueNameField = rep.getJobEntryAttributeString( id_jobentry, "valueNameField" );
+	      isEncryptedField = rep.getJobEntryAttributeString( id_jobentry, "isEncryptedField" );
 	      String sSubs = rep.getJobEntryAttributeString( id_jobentry, "useVariableSubstitution" );
 	      if ( sSubs != null && sSubs.equalsIgnoreCase( "T" ) ) {
 	        useVariableSubstitution = true;
@@ -126,6 +144,9 @@ public class JobEntrySetDBVars extends JobEntryBase implements Cloneable, JobEnt
 	      rep.saveDatabaseMetaJobEntryAttribute( id_job, getObjectId(), "connection", "id_database", connection );
 
 	      rep.saveJobEntryAttribute( id_job, getObjectId(), "sql", sql );
+	      rep.saveJobEntryAttribute( id_job, getObjectId(), "variableNameField", varNameField );
+	      rep.saveJobEntryAttribute( id_job, getObjectId(), "valueNameField", valueNameField );
+	      rep.saveJobEntryAttribute( id_job, getObjectId(), "isEncryptedField", isEncryptedField );
 	      rep.saveJobEntryAttribute( id_job, getObjectId(), "useVariableSubstitution", useVariableSubstitution
 	        ? "T" : "F" );
 
@@ -160,6 +181,25 @@ public class JobEntrySetDBVars extends JobEntryBase implements Cloneable, JobEnt
 
 	public void setSql(String sql) {
 		this.sql = sql;
+	}
+	
+	public String getVarNameField() {
+		return varNameField;
+	}
+	public void setVarNameField(String varNameField) {
+		this.varNameField = varNameField;
+	}
+	public String getValueNameField() {
+		return valueNameField;
+	}
+	public void setValueNameField(String valueNameField) {
+		this.valueNameField = valueNameField;
+	}
+	public String getIsEncryptedField() {
+		return isEncryptedField;
+	}
+	public void setIsEncryptedField(String isEncryptedField) {
+		this.isEncryptedField = isEncryptedField;
 	}
 	
 	/**
@@ -216,7 +256,6 @@ public class JobEntrySetDBVars extends JobEntryBase implements Cloneable, JobEnt
 		
 	    if ( connection != null ) {
 	        Database db = new Database( this, connection );
-	        FileObject SQLfile = null;
 	        db.shareVariablesWith( this );
 	        try {
 	            String mySQL = sql;
@@ -234,8 +273,74 @@ public class JobEntrySetDBVars extends JobEntryBase implements Cloneable, JobEnt
 	            
 	           rs = db.openQuery(mySQL); 
 	            
+	           while (rs.next())
+	           {
+	        	   String varname = rs.getString("nombre");
+	        	   String value = rs.getString("valor");
+	        	//   value = Encr.decryptPassword(value);
+	        	   
+	               switch ( variableScope ) {
+	               case VARIABLE_TYPE_JVM:
+	                 System.setProperty( varname, value );
+	                 setVariable( varname, value );
+	                 Job parentJobTraverse = parentJob;
+	                 while ( parentJobTraverse != null ) {
+	                   parentJobTraverse.setVariable( varname, value );
+	                   parentJobTraverse = parentJobTraverse.getParentJob();
+	                 }
+	                 break;
+
+	               case VARIABLE_TYPE_ROOT_JOB:
+	                 // set variable in this job entry
+	                 setVariable( varname, value );
+	                 Job rootJob = parentJob;
+	                 while ( rootJob != null ) {
+	                   rootJob.setVariable( varname, value );
+	                   rootJob = rootJob.getParentJob();
+	                 }
+	                 break;
+
+	               case VARIABLE_TYPE_CURRENT_JOB:
+	                 setVariable( varname, value );
+	                 if ( parentJob != null ) {
+	                   parentJob.setVariable( varname, value );
+	                 } else {
+	                   throw new KettleJobException( BaseMessages.getString(
+	                     PKG, "SetDBVars.Error.UnableSetVariableCurrentJob", varname ) );
+	                 }
+	                 break;
+
+	               case VARIABLE_TYPE_PARENT_JOB:
+	                 setVariable( varname, value );
+
+	                 if ( parentJob != null ) {
+	                   parentJob.setVariable( varname, value );
+	                   Job gpJob = parentJob.getParentJob();
+	                   if ( gpJob != null ) {
+	                     gpJob.setVariable( varname, value );
+	                   } else {
+	                     throw new KettleJobException( BaseMessages.getString(
+	                       PKG, "SetDBVars.Error.UnableSetVariableParentJob", varname ) );
+	                   }
+	                 } else {
+	                   throw new KettleJobException( BaseMessages.getString(
+	                     PKG, "SetDBVars.Error.UnableSetVariableCurrentJob", varname ) );
+	                 }
+	                 break;
+
+	               default:
+	                 break;
+	             }
+	        	 
+	             if ( log.isDetailed() ) {
+	                   logDetailed( BaseMessages.getString( PKG, "SetDBVars.Log.SetVariableToValue", varname, value ) );
+	               }  
+	        	   
+	           }
 	           
-	            
+	        }catch ( SQLException e ) {
+	            result.setNrErrors( 1 );
+	            logError( BaseMessages.getString( PKG, "SetDBVars.ErrorRunJobEntry", e.getMessage() ) ); 
 	        }catch ( KettleDatabaseException je ) {
 	            result.setNrErrors( 1 );
 	            logError( BaseMessages.getString( PKG, "SetDBVars.ErrorRunJobEntry", je.getMessage() ) );
@@ -257,5 +362,19 @@ public class JobEntrySetDBVars extends JobEntryBase implements Cloneable, JobEnt
 		return result;
 	  }
 		
-		
+	  public DatabaseMeta[] getUsedDatabaseConnections() {
+		    return new DatabaseMeta[] { connection, };
+	  }
+	 
+	  public List<ResourceReference> getResourceDependencies( JobMeta jobMeta ) {
+	      List<ResourceReference> references = super.getResourceDependencies( jobMeta );
+	      if ( connection != null ) {
+	         ResourceReference reference = new ResourceReference( this );
+	         reference.getEntries().add( new ResourceEntry( connection.getHostname(), ResourceType.SERVER ) );
+	         reference.getEntries().add( new ResourceEntry( connection.getDatabaseName(), ResourceType.DATABASENAME ) );
+	         references.add( reference );
+	      }
+	    return references;
+  }	
+
 }

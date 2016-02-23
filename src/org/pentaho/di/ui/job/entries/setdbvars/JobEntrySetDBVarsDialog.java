@@ -36,6 +36,7 @@ import org.pentaho.di.job.entry.JobEntryInterface;
 import org.pentaho.di.repository.Repository;
 import org.pentaho.di.ui.core.gui.WindowProperty;
 import org.pentaho.di.ui.core.widget.StyledTextComp;
+import org.pentaho.di.ui.core.widget.TextVar;
 import org.pentaho.di.ui.job.dialog.JobDialog;
 import org.pentaho.di.ui.job.entry.JobEntryDialog;
 import org.pentaho.di.ui.trans.step.BaseStepDialog;
@@ -69,6 +70,18 @@ public class JobEntrySetDBVarsDialog extends JobEntryDialog implements JobEntryD
 	private Label wlSQL;
 	private StyledTextComp wSQL;
 	private FormData fdlSQL, fdSQL;
+	
+	private Label wlVarNameField;
+	private TextVar wVarNameField;
+	private FormData fdlVarNameField, fdVarNameField;
+	
+	private Label wlValueNameField;
+	private TextVar wValueNameField;
+	private FormData fdlValueNameField, fdValueNameField;
+
+	private Label wlIsEncryptedField;
+	private TextVar wIsEncryptedField;
+	private FormData fdlIsEncryptedField, fdIsEncryptedField;
 	
 	private Button wOK, wCancel;
 	private Listener lsOK, lsCancel;
@@ -172,13 +185,71 @@ public class JobEntrySetDBVarsDialog extends JobEntryDialog implements JobEntryD
 	    wVariableScope.setLayoutData( fdVariableScope );
 	    wVariableScope.setItems( jobEntry.getVariableTypeDescriptions() );
 	    
+	    
+	    // Field that contains variable name
+	    wlVarNameField = new Label( shell, SWT.RIGHT );
+	    wlVarNameField.setText( BaseMessages.getString( PKG, "SetDBVars.VarNameField.Label" ) );
+	    props.setLook( wlVarNameField );
+	    fdlVarNameField = new FormData();
+	    fdlVarNameField.left = new FormAttachment( 0, 0 );
+	    fdlVarNameField.top = new FormAttachment( wVariableScope, margin );
+	    fdlVarNameField.right = new FormAttachment( middle, 0 );
+	    wlVarNameField.setLayoutData( fdlVarNameField );
+
+	    wVarNameField = new TextVar( jobMeta, shell, SWT.SINGLE | SWT.LEFT | SWT.BORDER );
+	    props.setLook( wVarNameField );
+	    wVarNameField.addModifyListener( lsMod );
+	    fdVarNameField = new FormData();
+	    fdVarNameField.left = new FormAttachment( middle, 0 );
+	    fdVarNameField.top = new FormAttachment( wVariableScope, margin );
+	    fdVarNameField.right = new FormAttachment( 100, 0 );
+	    wVarNameField.setLayoutData( fdVarNameField );
+	    
+	    // Field that contains value 
+	    wlValueNameField = new Label( shell, SWT.RIGHT );
+	    wlValueNameField.setText( BaseMessages.getString( PKG, "SetDBVars.ValueNameField.Label" ) );
+	    props.setLook( wlValueNameField );
+	    fdlValueNameField = new FormData();
+	    fdlValueNameField.left = new FormAttachment( 0, 0 );
+	    fdlValueNameField.top = new FormAttachment( wVarNameField, margin );
+	    fdlValueNameField.right = new FormAttachment( middle, 0 );
+	    wlValueNameField.setLayoutData( fdlValueNameField );
+
+	    wValueNameField = new TextVar( jobMeta, shell, SWT.SINGLE | SWT.LEFT | SWT.BORDER );
+	    props.setLook( wValueNameField );
+	    wValueNameField.addModifyListener( lsMod );
+	    fdValueNameField = new FormData();
+	    fdValueNameField.left = new FormAttachment( middle, 0 );
+	    fdValueNameField.top = new FormAttachment( wVarNameField, margin );
+	    fdValueNameField.right = new FormAttachment( 100, 0 );
+	    wValueNameField.setLayoutData( fdValueNameField );	    
+
+	    // Field that contains if value is encrypted 
+	    wlIsEncryptedField = new Label( shell, SWT.RIGHT );
+	    wlIsEncryptedField.setText( BaseMessages.getString( PKG, "SetDBVars.IsEncryptedField.Label" ) );
+	    props.setLook( wlIsEncryptedField );
+	    fdlIsEncryptedField = new FormData();
+	    fdlIsEncryptedField.left = new FormAttachment( 0, 0 );
+	    fdlIsEncryptedField.top = new FormAttachment( wValueNameField, margin );
+	    fdlIsEncryptedField.right = new FormAttachment( middle, 0 );
+	    wlIsEncryptedField.setLayoutData( fdlIsEncryptedField );
+
+	    wIsEncryptedField = new TextVar( jobMeta, shell, SWT.SINGLE | SWT.LEFT | SWT.BORDER );
+	    props.setLook( wIsEncryptedField );
+	    wIsEncryptedField.addModifyListener( lsMod );
+	    fdIsEncryptedField = new FormData();
+	    fdIsEncryptedField.left = new FormAttachment( middle, 0 );
+	    fdIsEncryptedField.top = new FormAttachment( wValueNameField, margin );
+	    fdIsEncryptedField.right = new FormAttachment( 100, 0 );
+	    wIsEncryptedField.setLayoutData( fdIsEncryptedField );		    
+	    
 	    // Use variable substitution?
 	    wlUseSubs = new Label( shell, SWT.RIGHT );
 	    wlUseSubs.setText( BaseMessages.getString( PKG, "SetDBVars.UseVariableSubst.Label" ) );
 	    props.setLook( wlUseSubs );
 	    fdlUseSubs = new FormData();
 	    fdlUseSubs.left = new FormAttachment( 0, 0 );
-	    fdlUseSubs.top = new FormAttachment( wVariableScope,  margin );
+	    fdlUseSubs.top = new FormAttachment( wIsEncryptedField,  margin );
 	    fdlUseSubs.right = new FormAttachment( middle, -margin );
 	    wlUseSubs.setLayoutData( fdlUseSubs );
 	    wUseSubs = new Button( shell, SWT.CHECK );
@@ -186,7 +257,7 @@ public class JobEntrySetDBVarsDialog extends JobEntryDialog implements JobEntryD
 	    wUseSubs.setToolTipText( BaseMessages.getString( PKG, "SetDBVars.UseVariableSubst.Tooltip" ) );
 	    fdUseSubs = new FormData();
 	    fdUseSubs.left = new FormAttachment( middle, 0 );
-	    fdUseSubs.top = new FormAttachment(  wVariableScope,  margin );
+	    fdUseSubs.top = new FormAttachment(  wIsEncryptedField,  margin );
 	    fdUseSubs.right = new FormAttachment( 100, 0 );
 	    wUseSubs.setLayoutData( fdUseSubs );
 	    wUseSubs.addSelectionListener( new SelectionAdapter() {
@@ -331,6 +402,17 @@ public class JobEntrySetDBVarsDialog extends JobEntryDialog implements JobEntryD
 	      wConnection.setText( "" );
 	    }
 
+	    if ( jobEntry.getVarNameField() != null ) {
+	        wVarNameField.setText( jobEntry.getVarNameField() );
+	    }
+	    if ( jobEntry.getValueNameField() != null ) {
+	        wValueNameField.setText( jobEntry.getValueNameField() );
+	    }
+	    if ( jobEntry.getIsEncryptedField() != null ) {
+	        wIsEncryptedField.setText( jobEntry.getIsEncryptedField() );
+	    }
+	    
+	    
 	    wUseSubs.setSelection( jobEntry.getUseVariableSubstitution() );
 
 	    wVariableScope.setText( jobEntry.getVariableTypeDescription( jobEntry.getVariableScope() ) );
@@ -367,6 +449,9 @@ public class JobEntrySetDBVarsDialog extends JobEntryDialog implements JobEntryD
 	   jobEntry.setUseVariableSubstitution( wUseSubs.getSelection() );
 	   jobEntry.setVariableScope( jobEntry.getVariableType( wVariableScope.getText() ) );
 	   jobEntry.setDatabase( jobMeta.findDatabase( wConnection.getText() ) );
+	   jobEntry.setVarNameField(wVarNameField.getText());
+	   jobEntry.setValueNameField(wValueNameField.getText());
+	   jobEntry.setIsEncryptedField(wIsEncryptedField.getText());
 	   dispose();
 	} 
 	 
