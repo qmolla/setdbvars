@@ -198,6 +198,7 @@ public class JobEntrySetDBVarsDialog extends JobEntryDialog implements JobEntryD
 
 	    wVarNameField = new TextVar( jobMeta, shell, SWT.SINGLE | SWT.LEFT | SWT.BORDER );
 	    props.setLook( wVarNameField );
+	    wVarNameField.setToolTipText(BaseMessages.getString( PKG, "SetDBVars.VarNameField.Tooltip" ));
 	    wVarNameField.addModifyListener( lsMod );
 	    fdVarNameField = new FormData();
 	    fdVarNameField.left = new FormAttachment( middle, 0 );
@@ -217,6 +218,7 @@ public class JobEntrySetDBVarsDialog extends JobEntryDialog implements JobEntryD
 
 	    wValueNameField = new TextVar( jobMeta, shell, SWT.SINGLE | SWT.LEFT | SWT.BORDER );
 	    props.setLook( wValueNameField );
+	    wValueNameField.setToolTipText(BaseMessages.getString( PKG, "SetDBVars.ValueNameField.Tooltip" ));
 	    wValueNameField.addModifyListener( lsMod );
 	    fdValueNameField = new FormData();
 	    fdValueNameField.left = new FormAttachment( middle, 0 );
@@ -236,6 +238,7 @@ public class JobEntrySetDBVarsDialog extends JobEntryDialog implements JobEntryD
 
 	    wIsEncryptedField = new TextVar( jobMeta, shell, SWT.SINGLE | SWT.LEFT | SWT.BORDER );
 	    props.setLook( wIsEncryptedField );
+	    wIsEncryptedField.setToolTipText(BaseMessages.getString( PKG, "SetDBVars.IsEncryptedField.Tooltip" ));
 	    wIsEncryptedField.addModifyListener( lsMod );
 	    fdIsEncryptedField = new FormData();
 	    fdIsEncryptedField.left = new FormAttachment( middle, 0 );

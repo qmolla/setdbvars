@@ -9,6 +9,7 @@ import org.pentaho.di.core.Const;
 import org.pentaho.di.core.Result;
 import org.pentaho.di.core.database.Database;
 import org.pentaho.di.core.database.DatabaseMeta;
+import org.pentaho.di.core.encryption.Encr;
 import org.pentaho.di.core.exception.KettleDatabaseException;
 import org.pentaho.di.core.exception.KettleException;
 import org.pentaho.di.core.exception.KettleJobException;
@@ -275,9 +276,13 @@ public class JobEntrySetDBVars extends JobEntryBase implements Cloneable, JobEnt
 	            
 	           while (rs.next())
 	           {
-	        	   String varname = rs.getString("nombre");
-	        	   String value = rs.getString("valor");
-	        	//   value = Encr.decryptPassword(value);
+	        	   String varname = rs.getString(varNameField);
+	        	   String value = rs.getString(valueNameField);
+	        	   Boolean isEncryted= rs.getBoolean(isEncryptedField);
+	        			   
+	        	   if (isEncryted)  {    	
+	        		   value = Encr.decryptPassword(value);
+	        	   }
 	        	   
 	               switch ( variableScope ) {
 	               case VARIABLE_TYPE_JVM:
@@ -333,7 +338,7 @@ public class JobEntrySetDBVars extends JobEntryBase implements Cloneable, JobEnt
 	             }
 	        	 
 	             if ( log.isDetailed() ) {
-	                   logDetailed( BaseMessages.getString( PKG, "SetDBVars.Log.SetVariableToValue", varname, value ) );
+	                   logDetailed( BaseMessages.getString( PKG, "SetDBVars.Log.SetVariableToValue", varname, isEncryted ? "*****Encrypted*****" : value ) );
 	               }  
 	        	   
 	           }

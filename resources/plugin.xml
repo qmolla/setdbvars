@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<plugin
+   id="setDBVars"
+   iconfile="SDBVAR.svg"
+   description="Set DB Variables"
+   tooltip="Set one or several variables from database query"
+   category="General"
+   classname="org.pentaho.di.job.entries.setdbvars.JobEntrySetDBVars">
+   <libraries>
+    <library name="setDBVariables.jar"/>
+    </libraries>
+    
+   <localized_category>
+     <category locale="en_US">General</category>
+   </localized_category>
+   <localized_description>
+     <description locale="en_US">Set DB Variables</description>
+   </localized_description>
+   <localized_tooltip>
+     <tooltip locale="en_US">Set one or several variables from database query</tooltip>
+   </localized_tooltip>
+   
+</plugin>
