@@ -276,9 +276,9 @@ public class JobEntrySetDBVars extends JobEntryBase implements Cloneable, JobEnt
 	            
 	           while (rs.next())
 	           {
-	        	   String varname = rs.getString(varNameField);
-	        	   String value = rs.getString(valueNameField);
-	        	   Boolean isEncryted= rs.getBoolean(isEncryptedField);
+	        	   String varname = rs.getString(environmentSubstitute(varNameField));
+	        	   String value = rs.getString(environmentSubstitute(valueNameField));
+	        	   Boolean isEncryted= rs.getBoolean(environmentSubstitute(isEncryptedField));
 	        			   
 	        	   if (isEncryted)  {    	
 	        		   value = Encr.decryptPassword(value);
