@@ -345,10 +345,12 @@ public class JobEntrySetDBVars extends JobEntryBase implements Cloneable, JobEnt
 	           
 	        }catch ( SQLException e ) {
 	            result.setNrErrors( 1 );
-	            logError( BaseMessages.getString( PKG, "SetDBVars.ErrorRunJobEntry", e.getMessage() ) ); 
+	            logError( BaseMessages.getString( PKG, "SetDBVars.ErrorRunJobEntry", e.getMessage() ) );
+	            throw new KettleDatabaseException( BaseMessages.getString( PKG, "SetDBVars.ErrorRunJobEntry" ), e );
 	        }catch ( KettleDatabaseException je ) {
 	            result.setNrErrors( 1 );
 	            logError( BaseMessages.getString( PKG, "SetDBVars.ErrorRunJobEntry", je.getMessage() ) );
+	            throw new KettleDatabaseException( BaseMessages.getString( PKG, "SetDBVars.ErrorRunJobEntry" ), je );
 	        } finally {
 	            db.disconnect();
 	        }
@@ -381,5 +383,13 @@ public class JobEntrySetDBVars extends JobEntryBase implements Cloneable, JobEnt
 	      }
 	    return references;
   }	
+	  
+	public boolean evaluates() {
+		    return true;
+	}
+
+	public boolean isUnconditional() {
+		    return true;
+    }
 
 }
